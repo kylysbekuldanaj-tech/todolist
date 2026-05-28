@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todoist Ultimate Gradient Pro with Charts</title>
+    <style>
+        /* БАСТАПҚЫ СТАНДАРТТЫ ТАҚЫРЫП (АҚ ГРАДИЕНТ) */
+        :root {
+            --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            --sidebar-bg: rgba(255, 255, 255, 0.9);
+            --card-bg: #ffffff;
+            --text-main: #2d3748;
+            --border-color: #e2e8f0;
+            --accent-color: #de4c4a;
+            --chart-bar-bg: #de4c4a;
+            --chart-empty: #edf2f7;
+        }
+
+        /* ҚАРА ГРАДИЕНТ ТАҚЫРЫБЫ */
+        body.theme-dark {
+            --bg-gradient: linear-gradient(135deg, #14171c 0%, #282c34 100%);
+            --sidebar-bg: rgba(33, 37, 43, 0.95);
+            --card-bg: #21252b;
+            --text-main: #abb2bf;
+            --border-color: #3e4451;
+            --accent-color: #61afef;
+            --chart-bar-bg: #61afef;
+            --chart-empty: #2b313c;
+        }
+
+        /* ҚЫЗҒЫЛТ (РОЗОВЫЙ) ГРАДИЕНТ ТАҚЫРЫБЫ */
+        body.theme-pink {
+            --bg-gradient: linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%);
+            --sidebar-bg: rgba(255, 255, 255, 0.85);
+            --card-bg: #ffffff;
+            --text-main: #4a4a4a;
+            --border-color: #fbc2eb;
+            --accent-color: #d53f8c;
+            --chart-bar-bg: #d53f8c;
+            --chart-empty: #fff5f7;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: '-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: var(--text-main);
+            transition: all 0.4s ease;
+        }
+
+        /* ТІРКЕЛУ ЭКРАНЫ */
+        .auth-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .auth-card {
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid var(--border-color);
+        }
+
+        /* НЕГІЗГІ ҚОСЫМША */
+        .app-container {
+            display: none;
+            flex: 1;
+        }
+
+        .app-container.active {
+            display: flex;
+        }
+
+        .burger-btn {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1000;
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: var(--sidebar-bg);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid var(--border-color);
+            padding: 25px 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 15px;
+            cursor: pointer;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            background: #cbd5e0;
+            color: #4a5568;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            object-fit: cover;
+            border: 2px solid var(--border-color);
+        }
+
+        .add-task-btn {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 15px;
+            text-align: left;
+        }
+
+        .menu-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .menu-item {
+            padding: 12px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.2s;
+        }
+
+        .menu-item:hover, .menu-item.active {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .badge {
+            background: rgba(0,0,0,0.08);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 40px;
+            background: rgba(255,255,255,0.1);
+        }
+
+        .view-section {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        /* ТАПСЫРМАЛАР СТИЛІ */
+        .task-list-wrapper {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .task-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 15px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .task-info-left {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .task-checkbox {
+            width: 22px;
+            height: 22px;
+            border: 2px solid var(--border-color);
+            border-radius: 50%;
+            cursor: pointer;
+            margin-top: 2px;
+        }
+
+        .task-meta-tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 5px;
+        }
+
+        .meta-tag {
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: rgba(0,0,0,0.05);
+        }
+
+        .priority-высокий { border-left: 4px solid #ecc94b; }
+        .priority-критический { border-left: 4px solid #e53e3e; }
+        .priority-низкий { border-left: 4px solid #4299e1; }
+
+        .delete-task-btn {
+            background: none;
+            border: none;
+            color: #e53e3e;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        /* ОТЧЕТТАР МЕН ДИАГРАММАЛАР СТИЛІ */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 25px;
+        }
+
+        .chart-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 25px;
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+        }
+
+        /* Дөңгелек CSS диаграмма */
+        .pie-chart {
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            background: conic-gradient(var(--accent-color) 0%, var(--chart-empty) 0%);
+            margin: 20px 0;
+            transition: background 0.5s ease;
+            position: relative;
+        }
+
+        .pie-chart::before {
+            content: '';
+            position: absolute;
+            top: 30px; left: 30px; right: 30px; bottom: 30px;
+            background: var(--card-bg);
+            border-radius: 50%;
+        }
+
+        .chart-percentage {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        /* Бағанды CSS диаграмма */
+        .bar-chart-container {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            width: 100%;
+            height: 160px;
+            margin-top: 20px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 5px;
+        }
+
+        .bar-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 30%;
+        }
+
+        .bar-fill {
+            width: 100%;
+            background: var(--chart-bar-bg);
+            border-radius: 6px 6px 0 0;
+            height: 0%; /* JS арқылы өзгереді */
+            transition: height 0.6s ease;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .bar-val {
+            font-size: 11px;
+            color: white;
+            font-weight: bold;
+            margin-top: 4px;
+        }
+
+        .bar-label {
+            font-size: 12px;
+            margin-top: 8px;
+            font-weight: 600;
+            opacity: 0.8;
+        }
+
+        /* НАСТРОЙКИ МОДАЛКАСЫ */
+        .settings-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 3000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .settings-box {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 850px;
+            height: 80vh;
+            border-radius: 16px;
+            display: flex;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        .settings-sidebar {
+            width: 240px;
+            background: rgba(0,0,0,0.02);
+            border-right: 1px solid var(--border-color);
+            padding: 20px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .settings-menu-item {
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .settings-menu-item.active, .settings-menu-item:hover {
+            background: rgba(0,0,0,0.05);
+            font-weight: 600;
+        }
+
+        .settings-body {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .settings-section {
+            display: none;
+        }
+
+        .settings-section.active {
+            display: block;
+        }
+
+        /* ПРОФИЛЬ ФОТО ЖҮКТЕУ СТИЛІ */
+        .profile-photo-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-top: 15px;
+            margin-bottom: 25px;
+        }
+
+        .big-avatar {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            object-fit: cover;
+            background: #cbd5e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: bold;
+            border: 3px solid var(--border-color);
+        }
+
+        .photo-btn-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .upload-btn {
+            background: #edf2f7;
+            color: #2d3748;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            border: 1px solid #cbd5e0;
+        }
+
+        .delete-photo-btn {
+            background: transparent;
+            color: #e53e3e;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            border: 1px solid #fed7d7;
+        }
+
+        .theme-card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .theme-box {
+            border: 2px solid var(--border-color);
+            padding: 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+
+        .theme-box:hover { transform: scale(1.03); }
+
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 6px; font-size: 14px; font-weight: 600; }
+        input, select { width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--card-bg); color: var(--text-main); outline: none; }
+        .btn-block { width: 100%; padding: 12px; background: var(--text-main); color: var(--card-bg); border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; justify-content: center; align-items: center; padding: 20px; }
+        .modal-content { background: var(--card-bg); padding: 25px; border-radius: 16px; width: 100%; max-width: 450px; border: 1px solid var(--border-color); }
+
+        /* СПРАВОЧНИК / ФУТЕР */
+        footer {
+            background: var(--card-bg);
+            border-top: 1px solid var(--border-color);
+            padding: 40px 20px;
+            margin-top: auto;
+            z-index: 10;
+        }
+
+        .footer-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 2fr repeat(2, 1fr);
+            gap: 30px;
+        }
+
+        .footer-links {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .footer-links a { color: var(--text-main); text-decoration: none; font-size: 14px; opacity: 0.8; }
+        .footer-links a:hover { text-decoration: underline; }
+
+        .whatsapp-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #25D366;
+            color: white !important;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            text-decoration: none;
+            margin-top: 15px;
+            font-size: 14px;
+            box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3);
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        @media (max-width: 768px) {
+            .burger-btn { display: block; }
+            .sidebar { position: fixed; left: -100%; top: 0; height: 100vh; z-index: 999; width: 260px; transition: left 0.3s ease; }
+            .sidebar.open { left: 0; }
+            .main-content { padding: 70px 15px 20px 15px; }
+            .settings-box { flex-direction: column; height: 95vh; }
+            .settings-sidebar { width: 100%; height: auto; flex-direction: row; overflow-x: auto; }
+            .footer-grid { grid-template-columns: 1fr; gap: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <button class="burger-btn" onclick="toggleSidebar()">☰ Меню</button>
+
+    <div class="auth-container" id="authPage">
+        <div class="auth-card">
+            <h2 id="authTitle" style="margin-bottom: 20px; text-align: center;">Тіркелу</h2>
+            <form id="authForm" onsubmit="handleAuth(event)">
+                <div class="form-group" id="nameGroup">
+                    <label>Атыңыз (Имя)</label>
+                    <input type="text" id="authName" placeholder="Атыңызды енгізіңіз">
+                </div>
+                <div class="form-group">
+                    <label>Email пошта</label>
+                    <input type="email" id="authEmail" required placeholder="example@mail.com">
+                </div>
+                <div class="form-group">
+                    <label>Құпия сөз</label>
+                    <input type="password" id="authPassword" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="btn-block" id="authBtn">Есептік жазбаны ашу</button>
+            </form>
+            <p style="text-align: center; margin-top: 15px; font-size: 14px; cursor: pointer; opacity: 0.8;" onclick="toggleAuthMode()" id="toggleAuthText">
+                Аккаунтыңыз бар ма? Жүйеге кіру
+            </p>
+        </div>
+    </div>
+
+    <div class="app-container" id="appPage">
+        <aside class="sidebar" id="sidebar">
+            <div class="user-profile" onclick="openSettingsModal()">
+                <div id="userAvatarContainer">
+                    <div class="avatar" id="userAvatar">U</div>
+                </div>
+                <div>
+                    <strong id="displayUserName">Қолданушы</strong>
+                    <div style="font-size: 11px; opacity: 0.6;">⚙_ Баптаулар</div>
+                </div>
+            </div>
+
+            <button class="add-task-btn" onclick="openModal()">+ Тапсырма қосу</button>
+
+            <ul class="menu-list">
+                <li class="menu-item active" onclick="switchSection('all-tasks', this)">
+                    <span>📥 Барлық тапсырмалар</span>
+                    <span class="badge" id="badge-all">0</span>
+                </li>
+                <li class="menu-item" onclick="switchSection('filter-tasks', this)">
+                    <span>🎨 Фильтры и метки</span>
+                </li>
+                <li class="menu-item" onclick="switchSection('report-tasks', this)">
+                    <span>📊 Отчеты (Есептер)</span>
+                </li>
+                <li class="menu-item" onclick="openSettingsModal()">
+                    <span>⚙_ Настройки</span>
+                </li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <section id="all-tasks" class="view-section active">
+                <h1>Менің тапсырмаларым</h1>
+                <div class="task-list-wrapper" id="tasksContainer"></div>
+            </section>
+
+            <section id="filter-tasks" class="view-section">
+                <h1>Фильтры и метки</h1>
+                <p style="margin-bottom: 20px; opacity: 0.7;">Приоритет деңгейі бойынша жылдам сүзгілеу:</p>
+                <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                    <button class="btn-block" style="background:#e53e3e; color:white;" onclick="filterByPriority('критический')">Критический</button>
+                    <button class="btn-block" style="background:#ecc94b; color:black;" onclick="filterByPriority('высокий')">Высокий</button>
+                    <button class="btn-block" style="background:#4299e1; color:white;" onclick="filterByPriority('низкий')">Низкий</button>
+                    <button class="btn-block" style="background:gray; color:white;" onclick="renderTasks()">Барлығы</button>
+                </div>
+                <div class="task-list-wrapper" id="filteredTasksContainer"></div>
+            </section>
+
+            <section id="report-tasks" class="view-section">
+                <h1>Жұмыс өнімділігінің есебі</h1>
+                
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <h3>Орындалу үлесі (%)</h3>
+                        <div class="pie-chart" id="pieChart">
+                            <div class="chart-percentage" id="piePercentage">0%</div>
+                        </div>
+                        <p style="font-size: 13px; opacity: 0.7; text-align: center;">Жалпы мақсаттардың орындалу пайызы</p>
+                    </div>
+
+                    <div class="chart-card">
+                        <h3>Тапсырмалар саны</h3>
+                        <div class="bar-chart-container">
+                            <div class="bar-wrapper">
+                                <div class="bar-fill" id="barTotal" style="height: 0%;"><span class="bar-val" id="valTotal">0</span></div>
+                                <div class="bar-label">Жалпы</div>
+                            </div>
+                            <div class="bar-wrapper">
+                                <div class="bar-fill" id="barDone" style="height: 0%; background: #48bb78;"><span class="bar-val" id="valDone">0</span></div>
+                                <div class="bar-label">Біткен</div>
+                            </div>
+                            <div class="bar-wrapper">
+                                <div class="bar-fill" id="barProcess" style="height: 0%; background: #ecc94b;"><span class="bar-val" id="valProcess">0</span></div>
+                                <div class="bar-label">Процесс</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div class="modal" id="taskModal">
+        <div class="modal-content">
+            <h3 style="margin-bottom: 15px;">Жаңа тапсырма қосу</h3>
+            <div class="form-group">
+                <label>Тапсырма мәтіні</label>
+                <input type="text" id="taskTitle" placeholder="Не істеу керек?" required>
+            </div>
+            <div class="form-group">
+                <label>Орындалу мерзімі (Срок)</label>
+                <input type="date" id="taskDate" required>
+            </div>
+            <div class="form-group">
+                <label>Приоритет</label>
+                <select id="taskPriority">
+                    <option value="низкий">Низкий 🔵</option>
+                    <option value="высокий">Высокий 🟡</option>
+                    <option value="критический">Критический 🔴</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Ескерту (Напоминание уақыты)</label>
+                <input type="time" id="taskTime" required>
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="btn-block" style="background:#cbd5e0; color:black;" onclick="closeModal()">Бас тарту</button>
+                <button class="btn-block" style="background:var(--accent-color); color:white;" onclick="createTask()">Қосу</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="settings-modal" id="settingsModal">
+        <div class="settings-box">
+            <aside class="settings-sidebar">
+                <h3 style="padding: 10px; font-size: 16px;">Настройки</h3>
+                <div class="settings-menu-item active" onclick="switchSettingsTab('account-tab', this)">👤 Аккаунт</div>
+                <div class="settings-menu-item" onclick="switchSettingsTab('theme-tab', this)">🎨 Тема (Дизайн)</div>
+                <div class="settings-menu-item" onclick="switchSettingsTab('notify-tab', this)">🔔 Напоминия</div>
+                <button class="btn-block" style="margin-top: auto; background: #e53e3e; color: white; padding: 8px;" onclick="closeSettingsModal()">Жабу</button>
+            </aside>
+
+            <div class="settings-body">
+                <div id="account-tab" class="settings-section active">
+                    <h2>Профильді баптау</h2>
+                    <p style="font-size: 13px; opacity: 0.6; margin-bottom: 20px;">Тариф: Beginner</p>
+                    
+                    <label style="font-weight: 600; font-size: 14px;">Фотосурет (Аватар)</label>
+                    <div class="profile-photo-wrapper">
+                        <div id="bigAvatarContainer">
+                            <div class="big-avatar" id="settingsBigAvatar">U</div>
+                        </div>
+                        <div>
+                            <div class="photo-btn-group">
+                                <input type="file" id="fileInput" accept="image/*" style="display: none;" onchange="previewImage(event)">
+                                <button class="upload-btn" onclick="document.getElementById('fileInput').click()">Поменять фото</button>
+                                <button class="delete-photo-btn" onclick="removeProfilePhoto()">Удалить фото</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Қолданушы аты (Имя)</label>
+                        <input type="text" id="settingsName" oninput="updateLiveName(this.value)">
+                    </div>
+                    <div class="form-group">
+                        <label>Email пошта</label>
+                        <input type="email" id="settingsEmail" readonly style="background: rgba(0,0,0,0.03);">
+                    </div>
+                </div>
+
+                <div id="theme-tab" class="settings-section">
+                    <h2>Интерфейс дизайны</h2>
+                    <p style="font-size: 13px; opacity: 0.6; margin-bottom: 20px;">Платформаның артқы градиент фонын ауыстырыңыз:</p>
+                    
+                    <div class="theme-card-grid">
+                        <div class="theme-box" style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); color: #2d3748;" onclick="changeTheme('light')">
+                            ⚪ Ақ градиент
+                        </div>
+                        <div class="theme-box" style="background: linear-gradient(135deg, #14171c 0%, #282c34 100%); color: #ffffff;" onclick="changeTheme('dark')">
+                            ⚫ Қара градиент
+                        </div>
+                        <div class="theme-box" style="background: linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%); color: #d53f8c;" onclick="changeTheme('pink')">
+                            🌸 Розовый градиент
+                        </div>
+                    </div>
+                </div>
+
+                <div id="notify-tab" class="settings-section">
+                    <h2>Ескертулер (Напоминания)</h2>
+                    <p style="margin-top: 15px; opacity: 0.7;">Дыбыстық жүйелік ескертулер іске қосылған.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-grid">
+            <div>
+                <h4 style="margin-bottom: 10px;">Todoist Справочник</h4>
+                <p style="font-size: 13px; opacity: 0.7; line-height: 1.4;">Тапсырмаларды оңай реттеуге, уақытты тиімді басқаруға және мақсаттарға жылдам жетуге арналған көмекші анықтамалық жүйе.</p>
+                <a href="https://wa.me/7052775921" target="_blank" class="whatsapp-btn">
+                    💬 WhatsApp байланыс сілтемесі
+                </a>
+            </div>
+            <div>
+                <h4 style="margin-bottom: 10px;">Анықтамалық</h4>
+                <ul class="footer-links">
+                    <li><a href="#">Қолдану ережелері</a></li>
+                    <li><a href="#">Құпиялылық саясаты</a></li>
+                    <li><a href="#">Жиі қойылатын сұрақтар</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 style="margin-bottom: 10px;">Қолдау қызметі</h4>
+                <ul class="footer-links">
+                    <li><a href="#">Техникалық көмек +77052775921</a></li>
+                    <li><a href="#">Байланыс орталығы:Шевченко 97</a></li>
+                    <li><a href="#">Кері байланыс +77052775921</a></li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        let tasks = [];
+        let profileImageSrc = null;
+
+        function toggleAuthMode() {
+            const isSignUp = document.getElementById('authTitle').innerText === "Тіркелу";
+            document.getElementById('authTitle').innerText = isSignUp ? "Жүйеге кіру" : "Тіркелу";
+            document.getElementById('nameGroup').style.display = isSignUp ? "none" : "block";
+            document.getElementById('authBtn').innerText = isSignUp ? "Кіру" : "Есептік жазбаны ашу";
+        }
+
+        function handleAuth(event) {
+            event.preventDefault();
+            const name = document.getElementById('authName').value || "Қолданушы";
+            const email = document.getElementById('authEmail').value;
+            
+            document.getElementById('authPage').style.display = 'none';
+            document.getElementById('appPage').classList.add('active');
+            
+            document.getElementById('displayUserName').innerText = name;
+            document.getElementById('settingsName').value = name;
+            document.getElementById('settingsEmail').value = email;
+            updateAvatarText(name);
+
+            // Бастапқы демо тапсырмалар
+            tasks = [
+                { id: 1, title: "Жобаның дизайнын бекіту", date: "2026-05-29", priority: "критический", time: "12:00", completed: false },
+                { id: 2, title: "Отчеттар бөлімін тексеру", date: "2026-05-29", priority: "высокий", time: "18:00", completed: true }
+            ];
+            renderTasks();
+            checkReminders();
+        }
+
+        function updateAvatarText(name) {
+            if (!profileImageSrc) {
+                const firstLetter = name.charAt(0).toUpperCase();
+                document.getElementById('userAvatar').innerText = firstLetter;
+                document.getElementById('settingsBigAvatar').innerText = firstLetter;
+            }
+        }
+
+        function updateLiveName(val) {
+            document.getElementById('displayUserName').innerText = val || "Қолданушы";
+            updateAvatarText(val || "Қолданушы");
+        }
+
+        function previewImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    profileImageSrc = e.target.result;
+                    document.getElementById('userAvatarContainer').innerHTML = `<img src="${profileImageSrc}" class="avatar" id="userAvatar">`;
+                    document.getElementById('bigAvatarContainer').innerHTML = `<img src="${profileImageSrc}" class="big-avatar" id="settingsBigAvatar">`;
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function removeProfilePhoto() {
+            profileImageSrc = null;
+            const name = document.getElementById('settingsName').value || "U";
+            document.getElementById('userAvatarContainer').innerHTML = `<div class="avatar" id="userAvatar"></div>`;
+            document.getElementById('bigAvatarContainer').innerHTML = `<div class="big-avatar" id="settingsBigAvatar"></div>`;
+            updateAvatarText(name);
+        }
+
+        function openSettingsModal() { document.getElementById('settingsModal').style.display = 'flex'; }
+        function closeSettingsModal() { document.getElementById('settingsModal').style.display = 'none'; }
+
+        function switchSettingsTab(tabId, element) {
+            document.querySelectorAll('.settings-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.settings-menu-item').forEach(m => m.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            element.classList.add('active');
+        }
+
+        function switchSection(sectionId, menuItem) {
+            document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+            document.getElementById(sectionId).classList.add('active');
+            menuItem.classList.add('active');
+            document.getElementById('sidebar').classList.remove('open');
+        }
+
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+        function openModal() { document.getElementById('taskModal').style.display = 'flex'; }
+        function closeModal() { document.getElementById('taskModal').style.display = 'none'; }
+
+        function createTask() {
+            const title = document.getElementById('taskTitle').value;
+            const date = document.getElementById('taskDate').value;
+            const priority = document.getElementById('taskPriority').value;
+            const time = document.getElementById('taskTime').value;
+
+            if(!title || !date || !time) return alert("Толық толтырыңыз!");
+
+            tasks.push({ id: Date.now(), title, date, priority, time, completed: false, reminded: false });
+            closeModal();
+            renderTasks();
+        }
+
+        function renderTasks() {
+            const container = document.getElementById('tasksContainer');
+            container.innerHTML = '';
+            tasks.forEach(task => {
+                const card = document.createElement('div');
+                card.className = `task-card priority-${task.priority}`;
+                card.innerHTML = `
+                    <div class="task-info-left">
+                        <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''} onclick="toggleComplete(${task.id})">
+                        <div>
+                            <h4 style="${task.completed ? 'text-decoration: line-through; opacity:0.5;' : ''}">${task.title}</h4>
+                            <div class="task-meta-tags">
+                                <span class="meta-tag">📅 ${task.date}</span>
+                                <span class="meta-tag">🚩 Приоритет: ${task.priority}</span>
+                                <span class="meta-tag">🔔 ${task.time}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="delete-task-btn" onclick="deleteTask(${task.id})">🗑 Удалить</button>
+                `;
+                container.appendChild(card);
+            });
+            document.getElementById('badge-all').innerText = tasks.length;
+            
+            // Диаграммалар мен статистиканы жаңарту
+            updateChartsAndMetrics();
+        }
+
+        function deleteTask(id) { tasks = tasks.filter(t => t.id !== id); renderTasks(); }
+        function toggleComplete(id) { const t = tasks.find(t => t.id === id); if(t) { t.completed = !t.completed; renderTasks(); } }
+
+        // ДИАГРАММАЛАРДЫ ДИНАМИКАЛЫҚ ТҮРДЕ ЕСЕПТЕУ ЖӘНЕ ЖАҢАРТУ
+        function updateChartsAndMetrics() {
+            const total = tasks.length;
+            const done = tasks.filter(t => t.completed).length;
+            const process = total - done;
+            const percent = total > 0 ? Math.round((done / total) * 100) : 0;
+
+            // 1. Дөңгелек диаграмманы жаңарту (Conic Gradient арқылы)
+            document.getElementById('piePercentage').innerText = percent + '%';
+            document.getElementById('pieChart').style.background = `conic-gradient(var(--accent-color) ${percent}%, var(--chart-empty) ${percent}%)`;
+
+            // 2. Бағанды диаграмма биіктіктерін есептеу (Максималды мән 100% биіктікке теңестіріледі)
+            const maxVal = Math.max(total, done, process, 1); 
+            
+            document.getElementById('barTotal').style.height = (total / maxVal * 100) + '%';
+            document.getElementById('valTotal').innerText = total;
+
+            document.getElementById('barDone').style.height = (done / maxVal * 100) + '%';
+            document.getElementById('valDone').innerText = done;
+
+            document.getElementById('barProcess').style.height = (process / maxVal * 100) + '%';
+            document.getElementById('valProcess').innerText = process;
+        }
+
+        function filterByPriority(level) {
+            const container = document.getElementById('filteredTasksContainer');
+            container.innerHTML = '';
+            const filtered = tasks.filter(t => t.priority === level);
+            if(filtered.length === 0) { container.innerHTML = '<p style="color:gray;text-align:center;padding:20px;">Тапсырма жоқ</p>'; return; }
+            filtered.forEach(t => {
+                container.innerHTML += `<div class="task-card priority-${t.priority}"><h4>${t.title}</h4></div>`;
+            });
+        }
+
+        function checkReminders() {
+            setInterval(() => {
+                const now = new Date();
+                const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+                const dateStr = now.toISOString().split('T')[0];
+                tasks.forEach(t => {
+                    if (!t.completed && !t.reminded && t.date === dateStr && t.time === timeStr) {
+                        t.reminded = true;
+                        alert(`🔔 Напоминание: "${t.title}" уақыты келді!`);
+                    }
+                });
+            }, 1000);
+        }
+
+        function changeTheme(mode) {
+            document.body.className = ''; 
+            if(mode === 'dark') {
+                document.body.classList.add('theme-dark');
+            } else if(mode === 'pink') {
+                document.body.classList.add('theme-pink');
+            }
+            // Тілқатысу кезінде диаграмма түстерін де қайта бейімдеу
+            updateChartsAndMetrics();
+        }
+    </script>
+</body>
+</html>
